@@ -188,7 +188,6 @@ document.addEventListener("keydown", function (event) {
   else if (/^[a-zA-Z]$/.test(event.key)) pressWordKey(event.key.toLowerCase());
 });
 
-document.getElementById("wordguess-btn").addEventListener("click", startWordGuess);
 document.getElementById("wg-new-btn").addEventListener("click", startWordGuess);
 
 
@@ -311,7 +310,6 @@ document.getElementById("lt-enter-btn").addEventListener("click", function () {
   tryLettersWord();
   if (lt.running) ltInput.focus();
 });
-document.getElementById("letters-btn").addEventListener("click", startLetters);
 document.getElementById("lt-new-btn").addEventListener("click", startLetters);
 
 
@@ -535,5 +533,4 @@ nmInput.addEventListener("input", updateNumbersFeedback);
 nmLockBtn.addEventListener("click", function () {
   if (nm.running) endNumbers();
 });
-document.getElementById("numbers-btn").addEventListener("click", startNumbers);
 document.getElementById("nm-new-btn").addEventListener("click", startNumbers);

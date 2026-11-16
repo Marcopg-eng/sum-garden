@@ -18,8 +18,9 @@
 //  12. The home screen
 //  13. Wiring up the buttons, then starting
 //
-// The three extra games (Word Sprout, Letter Patch, Number Plot) live in
-// puzzles.js, and the word list is in words.js.
+// Other files: plants.js (biomes, plants and wildlife data), puzzles.js
+// (Word Sprout, Letter Patch, Number Plot), words.js (the word list)
+// and logbook.js (the botany log screen).
 // =====================================================
 
 
@@ -227,23 +228,36 @@ const ITEMS = [
   ]},
 ];
 
-// What a sprout can grow into. A bigger "weight" means more likely.
-// The weights add up to 100, so each one is a percentage chance.
-const SPROUT_TABLE = [
-  { id: "daisy", weight: 18 }, { id: "fern", weight: 16 }, { id: "tulip", weight: 14 },
-  { id: "lavender", weight: 12 }, { id: "mushroom", weight: 10 }, { id: "sunflower", weight: 9 },
-  { id: "bush", weight: 6 }, { id: "rose", weight: 5 }, { id: "tree", weight: 4 },
-  { id: "goldtulip", weight: 4 }, { id: "moonshroom", weight: 2 },
-];
+// Items you unlock by attracting wildlife (see "unlock" and the botany log)
+ITEMS.push(
+  { id: "birdtable", name: "Bird table", price: 120, sway: false, unlock: "bird", unlockHint: "a bluebird visits", sprite: [
+    "........",".bbbbbb.","..yyyy..","bbbbbbbb","...bb...","...bb...","...bb...","..bbbb..",
+  ]},
+  { id: "logpile", name: "Log pile", price: 90, sway: false, unlock: "wormhouse", unlockHint: "worms build a house", sprite: [
+    "........","........","..bb.bb.",".boobboo",".boobboo","bbbbbbbb","boobboob","boobboob",
+  ]},
+  { id: "beehotel", name: "Bee hotel", price: 150, sway: false, unlock: "hive", unlockHint: "a beehive forms", sprite: [
+    "..bbbb..",".bbbbbb.",".ekekek.",".kekeke.",".ekekek.",".bbbbbb.","...bb...","...bb...",
+  ]}
+);
 
-// What kind of thing each item is. Visitors care about this.
+// The other 70 or so plants are in plants.js. Add them to the list, then
+// give the plants above their biome, Latin name and fact from the same file.
+NEW_PLANTS.forEach(function (plant) {
+  ITEMS.push(plant);
+});
+ITEMS.forEach(function (item) {
+  Object.assign(item, PLANT_INFO[item.id] || {});
+});
+
+// What kind of thing each item is, for items that don't say so themselves.
 const ITEM_TYPES = {
   daisy: "flower", tulip: "flower", lavender: "flower", sunflower: "flower", rose: "flower", goldtulip: "flower", meadow: "flower",
   mushroom: "mushroom", moonshroom: "mushroom",
   sprout: "leafy", fern: "leafy", bush: "leafy", cactus: "leafy", pumpkin: "leafy",
   tree: "tree", oak: "tree",
   pond: "water", lake: "water", stream: "water", lilypond: "water", well: "water", fountain: "water",
-  bench: "decor", frog: "decor", stones: "decor", fence: "decor", shed: "decor", greenhouse: "decor",
+  bench: "decor", frog: "decor", stones: "decor", birdtable: "decor", logpile: "decor", beehotel: "decor", fence: "decor", shed: "decor", greenhouse: "decor",
 };
 
 // Creatures that turn up in your garden, and what attracts them.
@@ -303,7 +317,21 @@ const PALETTE = {
   a: "#f5b301",  // gold
   c: "#bdeeff",  // pale icy blue
   e: "#e6d3a3",  // sand
+  m: "#d94f9e",  // magenta
+  t: "#3fb8a0",  // teal
+  h: "#7b4fb5",  // deep purple
+  i: "#f3ead2",  // ivory
+  j: "#1f6b3a",  // jungle green
+  q: "#9bbf8a",  // sage
+  x: "#a8323a",  // dark red
 };
+
+
+// Add the creatures from plants.js to the lists above
+Object.assign(EXTRA_SPRITES, MORE_SPRITES);
+BIOME_VISITORS.forEach(function (visitor) {
+  VISITORS.push(visitor);
+});
 
 
 // =====================================================
@@ -323,8 +351,13 @@ function makeFreshSave() {
     history: [],                               // one entry per finished round
     best: {},                                  // e.g. { "normal-typed": 31 }
     roundsPlayed: 0,                           // counts every finished round
+    biome: "meadow",                           // which garden you're looking at
+    gardens: {},                               // one garden per biome, e.g. gardens.desert
+    sprouts: {},                               // one sproutPlanted record per biome
+    log: {},                                   // species you've planted, e.g. { daisy: true }
+    seen: {},                                  // wildlife you've attracted, e.g. { bee: true }
     sproutPlanted: {},                         // plot number -> roundsPlayed when the sprout went in
-    settings: { mode: "typed", difficulty: "normal" },
+    settings: { mode: "typed", difficulty: "normal", game: "sums" },
   };
 }
 
@@ -339,7 +372,7 @@ function loadSave() {
       // Copy the saved values over the fresh ones. Starting from "fresh"
       // means anything missing from an old save still gets a sensible value.
       Object.assign(fresh, saved);
-      fresh.settings = Object.assign({ mode: "typed", difficulty: "normal" }, saved.settings);
+      fresh.settings = Object.assign({ mode: "typed", difficulty: "normal", game: "sums" }, saved.settings);
       // Safety checks in case the saved data is damaged
       if (Array.isArray(fresh.garden) && fresh.garden.length === 24) {
         // An old save from when the garden was 6 x 4. Move everything into
@@ -366,7 +399,33 @@ function loadSave() {
   } catch (error) {
     // Nothing to do: we just carry on with a fresh save.
   }
-  return fresh;
+  return normaliseSave(fresh);
+}
+
+// Make sure a save has everything the game expects. Old saves had one garden;
+// this gives every biome its own, and fills in the botany log from what's planted.
+function normaliseSave(data) {
+  if (!BIOMES.some(function (biome) { return biome.id === data.biome; })) data.biome = "meadow";
+
+  // save.garden always points at the garden you're looking at. It is the very
+  // same list as gardens[biome], not a copy, so changing one changes both.
+  data.gardens[data.biome] = data.garden;
+  data.sprouts[data.biome] = data.sproutPlanted;
+
+  BIOMES.forEach(function (biome) {
+    if (!Array.isArray(data.gardens[biome.id]) || data.gardens[biome.id].length !== GARDEN_PLOTS) {
+      data.gardens[biome.id] = new Array(GARDEN_PLOTS).fill(null);
+    }
+    if (!data.sprouts[biome.id]) data.sprouts[biome.id] = {};
+    // Anything already planted counts as logged
+    data.gardens[biome.id].forEach(function (value) {
+      const item = value && value[0] !== "@" ? findItem(value) : null;
+      if (item && item.latin) data.log[item.id] = true;
+    });
+  });
+  data.garden = data.gardens[data.biome];
+  data.sproutPlanted = data.sprouts[data.biome];
+  return data;
 }
 
 function writeSave() {
@@ -469,6 +528,84 @@ function findItem(id) {
   return ITEMS.find(function (item) {
     return item.id === id;
   });
+}
+
+// What type is an item: "flower", "mushroom", "leafy", "tree", "water" or "decor"?
+// New plants say so themselves; older items are looked up in ITEM_TYPES.
+function typeOf(id) {
+  const item = findItem(id);
+  return (item && item.type) || ITEM_TYPES[id];
+}
+
+// ----- Biomes -----
+
+function currentBiome() {
+  return BIOMES.find(function (biome) { return biome.id === save.biome; });
+}
+
+// How many of a biome's species are in your log?
+function speciesLogged(biomeId) {
+  return ITEMS.filter(function (item) {
+    return item.biome === biomeId && item.latin && save.log[item.id];
+  }).length;
+}
+
+// The first biome is always open. Each one after opens when you've logged
+// enough species in the one before it.
+function biomeUnlocked(i) {
+  return i === 0 || speciesLogged(BIOMES[i - 1].id) >= BIOMES[i - 1].need;
+}
+
+function switchBiome(biomeId) {
+  save.biome = biomeId;
+  save.garden = save.gardens[biomeId];
+  save.sproutPlanted = save.sprouts[biomeId];
+  selectedItemId = null;
+  writeSave();
+}
+
+// The row of biome buttons, used on the garden and shop screens.
+// "afterSwitch" is the function to run once a new biome is picked.
+function renderBiomeChips(container, afterSwitch) {
+  container.innerHTML = "";
+  BIOMES.forEach(function (biome, i) {
+    const chip = document.createElement("button");
+    chip.className = "chip";
+    chip.textContent = biome.name;
+    if (biome.id === save.biome) chip.classList.add("selected");
+    if (!biomeUnlocked(i)) {
+      chip.disabled = true;
+      chip.textContent = biome.name + " (locked)";
+    }
+    chip.addEventListener("click", function () {
+      switchBiome(biome.id);
+      afterSwitch();
+    });
+    container.appendChild(chip);
+  });
+}
+
+// What can a sprout grow into in this biome? Cheap plants are likely,
+// expensive ones less so, and the rare ones least of all.
+function sproutTable(biomeId) {
+  return ITEMS.filter(function (item) {
+    return item.biome === biomeId && item.latin;
+  }).map(function (item) {
+    let weight = 3;
+    if (item.price < 250) weight = 6;
+    if (item.price < 100) weight = 10;
+    if (item.rare) weight = 2;
+    return { id: item.id, weight: weight };
+  });
+}
+
+// The first time you see a creature or home it goes in the log, with a reward
+let newFinds = 0;
+function markSeen(id) {
+  if (save.seen[id]) return;
+  save.seen[id] = true;
+  save.coins = save.coins + 25;
+  newFinds = newFinds + 1;
 }
 
 // Restart a CSS animation. Removing and re-adding the class isn't enough on
@@ -685,6 +822,7 @@ function showScreen(name) {
   if (name === "garden") renderGarden();
   if (name === "shop") renderShop();
   if (name === "scores") renderScores();
+  if (name === "log") renderLog();   // renderLog lives in logbook.js
 
   window.scrollTo(0, 0);
 }
@@ -818,19 +956,26 @@ function handleWrong() {
 
 // ----- Sprouts -----
 
-// Any sprout that has been planted for enough rounds turns into something
-// random. Returns the names of what grew, for the results screen.
+// Any sprout that has been planted for enough rounds turns into a random
+// plant from its biome. Returns the names of what grew, for the results screen.
 function growSprouts() {
   const grown = [];
-  save.garden.forEach(function (itemId, index) {
-    if (itemId !== "sprout") return;
-    const plantedAt = save.sproutPlanted[index] || 0;
-    if (save.roundsPlayed - plantedAt >= SPROUT_ROUNDS) {
-      const newId = pickWeighted(SPROUT_TABLE);
-      save.garden[index] = newId;
-      delete save.sproutPlanted[index];
-      grown.push(findItem(newId).name);
-    }
+  // Check every biome's garden, not just the one on screen
+  BIOMES.forEach(function (biome) {
+    const garden = save.gardens[biome.id];
+    const planted = save.sprouts[biome.id];
+    garden.forEach(function (itemId, index) {
+      if (itemId !== "sprout") return;
+      const plantedAt = planted[index] || 0;
+      if (save.roundsPlayed - plantedAt >= SPROUT_ROUNDS) {
+        const newId = pickWeighted(sproutTable(biome.id));
+        garden[index] = newId;
+        delete planted[index];
+        save.log[newId] = true;   // straight into the botany log
+        const plant = findItem(newId);
+        grown.push(plant.name + (plant.rare ? " (rare!)" : ""));
+      }
+    });
   });
   return grown;
 }
@@ -949,6 +1094,15 @@ ITEMS.forEach(function (item) {
         spriteImages[item.id + "-" + mask] = makeSpriteImage(makeConnectedRows(item.connect, mask));
       }
       spriteImages[item.id] = spriteImages[item.id + "-10"];   // left + right, for the shop
+    } else if (item.shape) {
+      // A plant from plants.js: take its shape and swap the digits for its colours.
+      // colours "rk" means every 1 becomes r and every 2 becomes k.
+      const rows = SHAPES[item.shape].map(function (row) {
+        return row.replace(/[123]/g, function (digit) {
+          return item.colours[Number(digit) - 1] || item.colours[0];
+        });
+      });
+      spriteImages[item.id] = makeSpriteImage(rows);
     } else {
       spriteImages[item.id] = makeSpriteImage(item.sprite);
     }
@@ -985,6 +1139,7 @@ function makeSpriteElement(item) {
 // =====================================================
 
 function renderShop() {
+  renderBiomeChips(document.getElementById("shop-biome-chips"), renderShop);
   shopListEl.innerHTML = "";
 
   // filter() keeps only the buyable items; sort() puts the cheapest first
@@ -994,39 +1149,59 @@ function renderShop() {
     return a.price - b.price;
   });
 
+  // First the plants that belong to this biome, then things that go anywhere
+  addShopHeading(currentBiome().name + " plants");
   forSale.forEach(function (item) {
-    const card = document.createElement("div");
-    card.className = "shop-card";
-    card.appendChild(makeSpriteElement(item));
-
-    const name = document.createElement("p");
-    name.className = "shop-name";
-    name.textContent = item.name;
-    card.appendChild(name);
-
-    if (item.note) {
-      const note = document.createElement("p");
-      note.className = "small shop-note";
-      note.textContent = item.note;
-      card.appendChild(note);
-    }
-
-    const owned = document.createElement("p");
-    owned.className = "small";
-    owned.textContent = "In bag: " + (save.inventory[item.id] || 0);
-    card.appendChild(owned);
-
-    const button = document.createElement("button");
-    button.className = "btn";
-    button.textContent = "Buy " + item.price;
-    button.disabled = save.coins < item.price;   // greyed out if you can't afford it
-    button.addEventListener("click", function () {
-      buyItem(item.id);
-    });
-    card.appendChild(button);
-
-    shopListEl.appendChild(card);
+    if (item.biome === save.biome) addShopCard(item);
   });
+  addShopHeading("For any garden");
+  forSale.forEach(function (item) {
+    if (!item.biome) addShopCard(item);
+  });
+}
+
+function addShopHeading(text) {
+  const heading = document.createElement("p");
+  heading.className = "label shop-heading";
+  heading.textContent = text;
+  shopListEl.appendChild(heading);
+}
+
+function addShopCard(item) {
+  const card = document.createElement("div");
+  card.className = "shop-card";
+  card.appendChild(makeSpriteElement(item));
+
+  const name = document.createElement("p");
+  name.className = "shop-name";
+  name.textContent = item.name;
+  card.appendChild(name);
+
+  // Some items stay locked until you attract the right wildlife
+  const locked = item.unlock && !save.seen[item.unlock];
+  const noteText = locked ? "Unlocks when " + item.unlockHint : item.note;
+  if (noteText) {
+    const note = document.createElement("p");
+    note.className = "small shop-note";
+    note.textContent = noteText;
+    card.appendChild(note);
+  }
+
+  const owned = document.createElement("p");
+  owned.className = "small";
+  owned.textContent = "In bag: " + (save.inventory[item.id] || 0);
+  card.appendChild(owned);
+
+  const button = document.createElement("button");
+  button.className = "btn";
+  button.textContent = locked ? "Locked" : "Buy " + item.price;
+  button.disabled = locked || save.coins < item.price;   // greyed out if you can't buy it
+  button.addEventListener("click", function () {
+    buyItem(item.id);
+  });
+  card.appendChild(button);
+
+  shopListEl.appendChild(card);
 }
 
 function buyItem(id) {
@@ -1099,6 +1274,19 @@ function renderGarden() {
     selectedItemId = null;
   }
 
+  // --- The biome buttons, progress line and ground colour ---
+  renderBiomeChips(document.getElementById("biome-chips"), renderGarden);
+  const biome = currentBiome();
+  const biomeNumber = BIOMES.indexOf(biome);
+  const total = ITEMS.filter(function (item) { return item.biome === biome.id && item.latin; }).length;
+  let progress = biome.name + ": " + speciesLogged(biome.id) + " of " + total + " species logged.";
+  const next = BIOMES[biomeNumber + 1];
+  if (next && !biomeUnlocked(biomeNumber + 1)) {
+    progress = progress + " Log " + biome.need + " to open the " + next.name + ".";
+  }
+  document.getElementById("biome-progress").textContent = progress;
+  gardenGridEl.style.backgroundColor = biome.ground;
+
   // --- The plots ---
   gardenGridEl.innerHTML = "";
   // While you're holding something, empty plots get a dotted outline (see style.css)
@@ -1145,9 +1333,14 @@ function renderGarden() {
   // --- The bag ---
   trayEl.innerHTML = "";
   let bagIsEmpty = true;
+  let elsewhere = 0;   // how many things in the bag belong to other biomes
   ITEMS.forEach(function (item) {
     const count = save.inventory[item.id] || 0;
     if (count === 0) return;   // skip things you don't own
+    if (item.biome && item.biome !== save.biome) {   // it belongs in another biome
+      elsewhere = elsewhere + count;
+      return;
+    }
     bagIsEmpty = false;
 
     const button = document.createElement("button");
@@ -1175,7 +1368,9 @@ function renderGarden() {
     gardenHintEl.textContent = "Tap an empty plot to place your " + held.name.toLowerCase() +
       (itemSize(held) > 1 ? ". It needs a 2 x 2 space." : ".");
   } else if (bagIsEmpty) {
-    gardenHintEl.textContent = "Your bag is empty. Earn coins and visit the shop.";
+    gardenHintEl.textContent = elsewhere > 0
+      ? "Nothing in your bag grows here. " + elsewhere + " of your plants belong in other gardens."
+      : "Your bag is empty. Earn coins and visit the shop.";
   } else {
     gardenHintEl.textContent = "Tap something in your bag, then tap a plot.";
   }
@@ -1206,6 +1401,7 @@ function tapPlot(index) {
       save.garden[plot] = "@" + index;   // mark them all as covered...
     });
     save.garden[index] = held.id;        // ...then put the item itself in the first one
+    if (held.latin) save.log[held.id] = true;   // a real species: into the botany log
     save.inventory[held.id] = save.inventory[held.id] - 1;
     if (held.id === "sprout") {
       save.sproutPlanted[index] = save.roundsPlayed || 0;   // remember when it went in
@@ -1225,7 +1421,7 @@ function plotsOfType(type) {
   const plots = [];
   save.garden.forEach(function (value, index) {
     const item = itemAt(index);
-    if (item && ITEM_TYPES[item.id] === type) plots.push(index);
+    if (item && typeOf(item.id) === type) plots.push(index);
   });
   return plots;
 }
@@ -1240,9 +1436,10 @@ function currentVisitors() {
   });
 
   return VISITORS.filter(function (visitor) {
+    if (visitor.biome && visitor.biome !== save.biome) return false;   // wrong habitat
     let count = 0;
     plantedKinds.forEach(function (itemId) {
-      if (visitor.type === "any" || ITEM_TYPES[itemId] === visitor.type) count = count + 1;
+      if (visitor.type === "any" || typeOf(itemId) === visitor.type) count = count + 1;
     });
     return count >= visitor.kinds;
   });
@@ -1274,7 +1471,9 @@ function addWildlife() {
   const homes = [];
   let wanderers = 0;
 
+  newFinds = 0;
   visitors.forEach(function (visitor) {
+    markSeen(visitor.id);
     // Worms don't wander: one pokes in and out of the soil by each mushroom
     if (visitor.id === "worm") {
       mushrooms.slice(0, 3).forEach(function (index, n) {
@@ -1318,12 +1517,14 @@ function addWildlife() {
     addOverlay(spot, "bee", "orbit", across + 0.05, down + 0.05, 0.3);
     addOverlay(spot, "bee", "orbit", across + 0.05, down + 0.05, 0.3).style.animationDelay = "-1.5s";
     homes.push("Beehive");
+    markSeen("hive");
   }
 
   // 3 mushrooms: the worms build a little house
   if (mushrooms.length >= 3) {
     addOverlay(mushrooms[1], "wormhouse", "", 0, 0.55, 0.45);
     homes.push("Worm house");
+    markSeen("wormhouse");
   }
 
   // Fish jump in streams, ponds and lakes. More water, more fish.
@@ -1332,7 +1533,10 @@ function addWildlife() {
     const fish = addOverlay(index, "fish", "fish", 0.28 * size, 0.25 * size, 0.45);
     fish.firstChild.style.animationDelay = (-n * 1.3) + "s";
   });
-  if (waters.length >= 4) homes.push("Fish shoal");
+  if (waters.length >= 4) {
+    homes.push("Fish shoal");
+    markSeen("shoal");
+  }
 
   // Fireflies. They are always here, but only glow at night (see style.css).
   [[12, 20], [34, 70], [55, 35], [71, 80], [88, 25], [45, 55]].forEach(function (place, n) {
@@ -1348,9 +1552,14 @@ function addWildlife() {
   let line = "No visitors yet. Different plants attract different creatures.";
   if (visitors.length > 0) {
     const names = visitors.map(function (visitor) { return visitor.name; });
-    line = "Visitors: " + names.join(", ") + " (" + visitors.length + " of " + VISITORS.length + ")";
+    line = "Visitors: " + names.join(", ") + " (" + visitors.length + ")";
   }
   if (homes.length > 0) line = line + ". Homes: " + homes.join(", ");
+  if (newFinds > 0) {
+    line = line + ". New in your botany log! +" + (newFinds * 25) + " coins";
+    writeSave();
+    updateCoinDisplay();
+  }
   visitorLineEl.textContent = line;
 }
 
@@ -1425,7 +1634,7 @@ function tapReset() {
     resetBtn.textContent = "tap again to wipe coins, garden and scores";
     return;
   }
-  save = makeFreshSave();
+  save = normaliseSave(makeFreshSave());
   selectedItemId = null;
   writeSave();
   updateCoinDisplay();
@@ -1437,9 +1646,28 @@ function tapReset() {
 // 12. THE HOME SCREEN
 // =====================================================
 
+// The four games you can pick at the top of the home screen
+const GAME_BLURBS = {
+  words: "Guess the 5-letter word in 6 tries. Fewer guesses, more coins.",
+  letters: "Nine letters, 30 seconds. Make the longest word you can.",
+  numbers: "Six numbers, one target, 60 seconds. Get as close as you can.",
+};
+
 function renderHome() {
+  const game = save.settings.game;
+
+  // Highlight the chosen game
+  document.querySelectorAll(".mode-tab").forEach(function (tab) {
+    tab.classList.toggle("selected", tab.dataset.game === game);
+  });
+
+  // Sums has settings; the other three just have a short description
+  document.getElementById("sums-settings").classList.toggle("hidden", game !== "sums");
+  document.getElementById("game-blurb").classList.toggle("hidden", game === "sums");
+  document.getElementById("blurb-text").textContent = GAME_BLURBS[game] || "";
+
   // Highlight the chips that match the current settings
-  document.querySelectorAll(".chip").forEach(function (chip) {
+  document.querySelectorAll("#sums-settings .chip").forEach(function (chip) {
     const setting = chip.dataset.setting;   // "mode" or "difficulty"
     chip.classList.toggle("selected", save.settings[setting] === chip.dataset.value);
   });
@@ -1452,13 +1680,32 @@ function renderHome() {
   bestLineEl.textContent = "Personal best: " + (save.best[bestKey()] || 0);
 }
 
+// The big Start button starts whichever game is selected.
+// The three word and number games are in puzzles.js.
+function startSelectedGame() {
+  const game = save.settings.game;
+  if (game === "words") startWordGuess();
+  else if (game === "letters") startLetters();
+  else if (game === "numbers") startNumbers();
+  else startRound();
+}
+
 
 // =====================================================
 // 13. WIRING UP THE BUTTONS, THEN STARTING
 // addEventListener("click", ...) means: when this is clicked, run that.
 // =====================================================
 
-startBtn.addEventListener("click", startRound);
+startBtn.addEventListener("click", startSelectedGame);
+
+// The four game boxes at the top of the home screen
+document.querySelectorAll(".mode-tab").forEach(function (tab) {
+  tab.addEventListener("click", function () {
+    save.settings.game = tab.dataset.game;
+    writeSave();
+    renderHome();
+  });
+});
 againBtn.addEventListener("click", startRound);
 quitBtn.addEventListener("click", quitRound);
 resetBtn.addEventListener("click", tapReset);
@@ -1474,7 +1721,7 @@ document.querySelectorAll(".nav-btn").forEach(function (button) {
 });
 
 // The settings chips on the home screen
-document.querySelectorAll(".chip").forEach(function (chip) {
+document.querySelectorAll("#sums-settings .chip").forEach(function (chip) {
   chip.addEventListener("click", function () {
     save.settings[chip.dataset.setting] = chip.dataset.value;
     writeSave();

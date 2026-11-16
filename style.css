@@ -952,6 +952,100 @@ body.night .firefly { animation: glow 3.2s ease-in-out infinite; }
 #nm-feedback { min-height: 18px; font-weight: 700; }
 
 
+/* ----- 20. Home: the four game boxes ----- */
+.mode-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.mode-tab {
+  padding: 14px 6px;
+  color: var(--ink);
+  background: var(--card);
+  border: 4px solid var(--ink);
+  box-shadow:
+    inset 4px 4px 0 rgba(255, 255, 255, 0.75),
+    inset -4px -4px 0 rgba(43, 38, 64, 0.18),
+    5px 5px 0 var(--ink);
+  cursor: pointer;
+}
+
+.mode-tab.selected {
+  background: var(--yellow);
+  transform: translate(3px, 3px);
+  box-shadow:
+    inset 4px 4px 0 rgba(43, 38, 64, 0.2),
+    inset -3px -3px 0 rgba(255, 255, 255, 0.5),
+    2px 2px 0 var(--ink);
+}
+
+.mode-name {
+  display: block;
+  font-family: "Press Start 2P", monospace;
+  font-size: 11px;
+  margin-bottom: 8px;
+}
+
+.mode-sub {
+  display: block;
+  font-family: "Silkscreen", monospace;
+  font-size: 12px;
+}
+
+
+/* ----- 21. Biomes and the botany log ----- */
+.biome-chips { margin-bottom: 10px; }
+.biome-chips .chip { font-size: 11px; padding: 8px 8px; }
+.chip:disabled { background: #d9d5cf; color: #8b8698; cursor: not-allowed; }
+
+.shop-heading {
+  grid-column: 1 / -1;     /* stretch across every column of the shop grid */
+  margin: 4px 0 -6px;
+  text-align: left;
+}
+
+.log-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.log-card {
+  aspect-ratio: 1;
+  padding: 5px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 14px;
+  color: #8b8698;
+  background: var(--card);
+  border: 3px solid var(--ink);
+  cursor: pointer;
+}
+
+.log-card.rare { border-color: #c98a00; background: #fff3c4; }
+.log-card.selected { background: var(--blue); }
+.log-details { text-align: center; margin-top: -4px; }
+.latin { font-style: italic; margin: 0 0 6px; }
+
+.nav { gap: 6px; }
+.nav-btn { font-size: 9px; }
+
+/* The moon: a square with its corners cut off, which reads as round in pixel art */
+.night-sky::after {
+  content: "";
+  position: absolute;
+  right: 14vw;
+  top: 84px;
+  width: 44px;
+  height: 44px;
+  background: #fff6d6;
+  box-shadow: inset -8px -8px 0 #e3d6a4, inset 10px 12px 0 -6px #e3d6a4;
+  clip-path: polygon(25% 0, 75% 0, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0 75%, 0 25%);
+}
+
+
 /* Some people get dizzy from movement and switch it off on their device.
    This respects that setting. */
 @media (prefers-reduced-motion: reduce) {

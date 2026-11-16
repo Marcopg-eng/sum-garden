@@ -17,6 +17,7 @@ If something breaks, open the browser console: in Chrome press Cmd+Option+J. Err
 - `index.html` is **what's on the page**: the screens, buttons and text boxes.
 - `style.css` is **how it looks**: colours, fonts, sizes, animations.
 - `game.js` is **how it behaves**: questions, timer, coins, shop, garden.
+- `plants.js` is the data for biomes, plants and wildlife, and `logbook.js` is the botany log screen.
 - `puzzles.js` is the three extra games, and `words.js` is their word list.
 
 The HTML gives things an `id` (like `id="score"`). The JavaScript finds them by that id and changes them. The CSS styles things by their `class` (like `class="btn"`).
@@ -67,17 +68,27 @@ Each shop item's picture is 8 rows of 8 letters. Each letter is a colour from `P
 
 ### Luck: sprouts and bonus coins (parts 1, 7 and 13)
 
-A planted sprout grows after 3 rounds into something from `SPROUT_TABLE`. Each entry has a `weight`, and `pickWeighted` works like a raffle where the weight is the number of tickets. Two plants (golden tulip, moon mushroom) have `shop: false`, so a sprout is the only way to get them.
+A planted sprout grows after 3 rounds into a random plant from the biome it's in. `sproutTable` gives each plant a `weight`, and `pickWeighted` works like a raffle where the weight is the number of tickets. Rare plants have `shop: false`, so a sprout is the only way to get them.
 
 Bonus coins use `Math.random() < BONUS_COIN_CHANCE`: each second outside a round there's a 4% chance one appears. Both are the same ideas you'll meet in probability questions.
 
-Try: change the weights so the moon mushroom is common, or work out how long you'd expect to wait for a bonus coin.
+Try: change the weights in `sproutTable` so rare plants are common, or work out how long you'd expect to wait for a bonus coin.
 
 ### Garden visitors (parts 1 and 10)
 
 `ITEM_TYPES` says what kind of thing each item is, and `VISITORS` lists each creature with what attracts it. `currentVisitors()` counts how many different kinds of each type are planted and returns the creatures whose rule is met.
 
 Try: add your own visitor. Draw it in `EXTRA_SPRITES`, then add one line to `VISITORS`.
+
+### Biomes, plants and the botany log (plants.js, logbook.js)
+
+`plants.js` is pure data: five biomes, about 85 plants, and the wildlife. Plants share 18 pixel `SHAPES`, and each plant recolours a shape with its own `colours`, which is why adding one takes a single `P(...)` line.
+
+Each biome has its own garden in `save.gardens`. `save.garden` always points at the one on screen. A biome opens when you've logged 10 species in the one before it.
+
+`logbook.js` draws the log from `save.log` (plants) and `save.seen` (wildlife).
+
+Try: add a plant of your own to a biome with one `P(...)` line. It will appear in the shop, the sprout raffle and the log without any other changes.
 
 ### Big pieces and joining tiles (parts 1, 8 and 10)
 

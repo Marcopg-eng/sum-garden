@@ -34,9 +34,18 @@
     <!-- ============ HOME SCREEN ============ -->
     <section id="screen-home" class="screen">
       <h1 class="title">Sum<br>Garden</h1>
-      <p class="tagline">60 seconds. Quick sums. Grow a garden.</p>
+      <p class="tagline">Pick a game. Earn coins. Grow a garden.</p>
 
-      <div class="panel">
+      <!-- The four games. game.js adds "selected" to the one you pick. -->
+      <div class="mode-tabs">
+        <button class="mode-tab" data-game="sums"><span class="mode-name">Sums</span><span class="mode-sub">60s mental maths</span></button>
+        <button class="mode-tab" data-game="words"><span class="mode-name">Word Sprout</span><span class="mode-sub">guess the word</span></button>
+        <button class="mode-tab" data-game="letters"><span class="mode-name">Letter Patch</span><span class="mode-sub">longest word</span></button>
+        <button class="mode-tab" data-game="numbers"><span class="mode-name">Number Plot</span><span class="mode-sub">hit the target</span></button>
+      </div>
+
+      <!-- Shown when Sums is selected -->
+      <div class="panel" id="sums-settings">
         <p class="label">Answer mode</p>
         <div class="chips">
           <!-- data-setting and data-value are read by game.js when you click -->
@@ -55,14 +64,12 @@
         <p class="small" id="best-line"></p>
       </div>
 
-      <button id="start-btn" class="btn btn-big">Start round</button>
-
-      <div class="panel">
-        <p class="label">More games</p>
-        <button id="wordguess-btn" class="btn">Word Sprout · guess the word</button>
-        <button id="letters-btn" class="btn">Letter Patch · longest word</button>
-        <button id="numbers-btn" class="btn">Number Plot · hit the target</button>
+      <!-- Shown for the other three games -->
+      <div class="panel hidden" id="game-blurb">
+        <p class="small" id="blurb-text"></p>
       </div>
+
+      <button id="start-btn" class="btn btn-big">Start</button>
     </section>
 
     <!-- ============ WORD SPROUT (puzzles.js part B) ============ -->
@@ -142,6 +149,8 @@
     <!-- ============ GARDEN SCREEN ============ -->
     <section id="screen-garden" class="screen hidden">
       <h2>Your garden</h2>
+      <div id="biome-chips" class="chips biome-chips"></div>
+      <p class="small" id="biome-progress"></p>
       <p class="small" id="garden-hint"></p>
       <div id="garden-grid" class="garden-grid"></div>
       <p class="small" id="visitor-line"></p>
@@ -153,7 +162,15 @@
     <section id="screen-shop" class="screen hidden">
       <h2>Shop</h2>
       <p class="small">Spend coins here, then plant things in your garden.</p>
+      <div id="shop-biome-chips" class="chips biome-chips"></div>
       <div id="shop-list" class="shop-list"></div>
+    </section>
+
+    <!-- ============ BOTANY LOG (logbook.js) ============ -->
+    <section id="screen-log" class="screen hidden">
+      <h2>Botany log</h2>
+      <p class="small">Every species you plant and every creature you attract is recorded here. Tap one to read about it.</p>
+      <div id="log-content"></div>
     </section>
 
     <!-- ============ SCORES SCREEN ============ -->
@@ -183,11 +200,15 @@
     <button class="nav-btn" data-screen="home">Play</button>
     <button class="nav-btn" data-screen="garden">Garden</button>
     <button class="nav-btn" data-screen="shop">Shop</button>
+    <button class="nav-btn" data-screen="log">Log</button>
     <button class="nav-btn" data-screen="scores">Scores</button>
   </nav>
 
   <!-- The logic. Loaded last, so everything above exists before the code runs. -->
+  <!-- plants.js is data that game.js needs, so it loads first -->
+  <script src="plants.js"></script>
   <script src="game.js"></script>
+  <script src="logbook.js"></script>
   <!-- The word list, then the three extra games that use it -->
   <script src="words.js"></script>
   <script src="puzzles.js"></script>
