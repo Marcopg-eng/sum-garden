@@ -33,8 +33,8 @@
 const ROUND_SECONDS = 60;   // how long a round lasts
 const STREAK_LENGTH = 5;    // every 5 correct answers in a row...
 const STREAK_BONUS = 5;     // ...you get this many bonus coins
-const GARDEN_COLUMNS = 10;  // how many plots across
-const GARDEN_PLOTS = 70;    // 10 columns x 7 rows
+const GARDEN_COLUMNS = 14;  // how many plots across
+const GARDEN_PLOTS = 126;   // 14 columns x 9 rows
 const SAVE_KEY = "sumGardenSave1";  // the name our save is stored under
 const SPROUT_ROUNDS = 3;    // a planted sprout grows up after this many rounds
 const BONUS_COIN_CHANCE = 0.04; // each second, the chance a bonus coin appears (0.04 = 4%)
@@ -139,7 +139,7 @@ const ITEMS = [
     "...bb...",
     "..bbbb..",
   ]},
-  { id: "frog", name: "Frog", price: 800, sway: false, sprite: [
+  { id: "frog", name: "Frog", price: 150, sway: false, roam: true, note: "Roams around the garden", sprite: [
     "........",
     ".ll..ll.",
     "lkllllkl",
@@ -230,6 +230,39 @@ const ITEMS = [
 
 // Items you unlock by attracting wildlife (see "unlock" and the botany log)
 ITEMS.push(
+  // ----- more big pieces -----
+  { id: "hill", name: "Rocky hill", price: 500, sway: false, size: 2, note: "Takes a 2 x 2 space", sprite: [
+    "................","......gggg......","....ggggglgg....","...gglggggggg...",
+    "..ssgggggggglss.",".sssssggggsssss.",".sswssssssssssss","sssssssswsssssss",
+    "sssqssssssssqsss","ssssssssssssssss","sqssssswssssssqs","ssssssssssssssss",
+    "sssssqssssssssss",".ssssssssssssss.","..dddddddddddd..","................",
+  ]},
+  { id: "waterfall", name: "Waterfall", price: 1000, sway: false, size: 2, water: true, note: "Takes a 2 x 2 space", sprite: [
+    "...ssssuussss...","..sssssuusssss..",".ssssscuucsssss.",".sswsscuucssqss.",
+    ".sssssuccusssss.",".ssqsscuucsssss.",".ssssscuucsswss.",".sssssuccusssss.",
+    ".sssqscuucsssss.",".ssssscuucsssss.","..sswcwuuwcwss..",".uuuuwwccwwuuuu.",
+    "uuucuuuuuuuucuuu","uuuuuuucuuuuuuuu",".uuuuuuuuuuuuuu.","..ssuuuuuuuuss..",
+  ]},
+  // "spin" names a picture that is drawn on top and turns round and round
+  { id: "waterwheel", name: "Water wheel", price: 1300, sway: false, size: 2, water: true, spin: "wheel", note: "Takes a 2 x 2 space", sprite: [
+    "................","................","................","................",
+    "................","bb............bb","bb............bb","bb............bb",
+    "bb............bb","bb............bb","bb............bb","bb............bb",
+    "bbuuuuuuuuuuuubb","bbucuuuuucuuuubb","bbbbbbbbbbbbbbbb","ssssssssssssssss",
+  ]},
+  // ----- animals: "roam: true" means they wander the garden instead of sitting on a plot -----
+  { id: "petduck", name: "Duck", price: 200, sway: false, roam: true, note: "Roams around the garden", sprite: [
+    "........","....ww..","...wwkw.","...wwwoo","w.wwww..","wwwwwww.",".wwwww..","..o.o...",
+  ]},
+  { id: "hen", name: "Hen", price: 180, sway: false, roam: true, note: "Roams around the garden", sprite: [
+    "........","....rr..","....kww.","w...wwwo","wwwwwww.",".wwwwww.","..wwww..","..o..o..",
+  ]},
+  { id: "rabbit", name: "Rabbit", price: 250, sway: false, roam: true, note: "Roams around the garden", sprite: [
+    "......s.",".....ss.",".....sks","..sssss.",".ssssss.","wssssss.",".s..ss..","........",
+  ]},
+  { id: "tortoise", name: "Tortoise", price: 300, sway: false, roam: true, note: "Roams around the garden", sprite: [
+    "........","........","..dddd..",".dldldd.","ddddddll",".dddddlk",".l..l...","........",
+  ]},
   { id: "birdtable", name: "Bird table", price: 120, sway: false, unlock: "bird", unlockHint: "a bluebird visits", sprite: [
     "........",".bbbbbb.","..yyyy..","bbbbbbbb","...bb...","...bb...","...bb...","..bbbb..",
   ]},
@@ -257,7 +290,8 @@ const ITEM_TYPES = {
   sprout: "leafy", fern: "leafy", bush: "leafy", cactus: "leafy", pumpkin: "leafy",
   tree: "tree", oak: "tree",
   pond: "water", lake: "water", stream: "water", lilypond: "water", well: "water", fountain: "water",
-  bench: "decor", frog: "decor", stones: "decor", birdtable: "decor", logpile: "decor", beehotel: "decor", fence: "decor", shed: "decor", greenhouse: "decor",
+  bench: "decor", frog: "decor", stones: "decor", birdtable: "decor", logpile: "decor", beehotel: "decor", hill: "decor",
+  waterfall: "water", waterwheel: "water", petduck: "animal", hen: "animal", rabbit: "animal", tortoise: "animal", fence: "decor", shed: "decor", greenhouse: "decor",
 };
 
 // Creatures that turn up in your garden, and what attracts them.
@@ -285,7 +319,11 @@ const EXTRA_SPRITES = {
   dragonfly:["........","cc...cc.",".cc.cc..","nnnnnnnk",".cc.cc..","cc...cc.","........","........"],
   duck:     ["........","....ww..","...wwkw.","...wwwoo","w.wwww..","wwwwwww.",".wwwww..","........"],
   bird:     ["........","....uu..","...uuku.","u..uuuuo",".uuuuuu.","..uuuu..","..k.k...","........"],
-  wormup:   ["...pp...","..pkpk..","..pppp..","...pp...","...pp...","...pp...","...pp...","...pp..."],
+  // The water wheel's wheel, 12 x 12. It is drawn over the frame and spins.
+  wheel: [
+    "....bbbb....","..oo.bb.oo..",".o...bb...o.",".o...bb...o.","b....bb....b","bbbbbbbbbbbb",
+    "bbbbbbbbbbbb","b....bb....b",".o...bb...o.",".o...bb...o.","..oo.bb.oo..","....bbbb....",
+  ],
   fish:     ["........","........",".o..oo..",".oooooo.",".ooooko.",".o..oo..","........","........"],
   hive:     ["..aaaa..",".aaaaaa.","abbbbbba",".aaaaaa.","abbbbbba",".aakkaa.",".aakkaa.","..aaaa.."],
   wormhouse:["........","...bb...","..bbbb..",".bbbbbb.","bbbkkbbb","bbbkkbbb","dbbkkbbd","dddddddd"],
@@ -356,6 +394,8 @@ function makeFreshSave() {
     sprouts: {},                               // one sproutPlanted record per biome
     log: {},                                   // species you've planted, e.g. { daisy: true }
     seen: {},                                  // wildlife you've attracted, e.g. { bee: true }
+    pets: {},                                  // animals set free in each biome, e.g. pets.meadow = { hen: 2 }
+    top: [],                                   // your ten best sums rounds ever
     sproutPlanted: {},                         // plot number -> roundsPlayed when the sprout went in
     settings: { mode: "typed", difficulty: "normal", game: "sums" },
   };
@@ -374,25 +414,7 @@ function loadSave() {
       Object.assign(fresh, saved);
       fresh.settings = Object.assign({ mode: "typed", difficulty: "normal", game: "sums" }, saved.settings);
       // Safety checks in case the saved data is damaged
-      if (Array.isArray(fresh.garden) && fresh.garden.length === 24) {
-        // An old save from when the garden was 6 x 4. Move everything into
-        // the middle of the new, bigger garden so nothing is lost.
-        const bigger = new Array(GARDEN_PLOTS).fill(null);
-        const movedSprouts = {};
-        fresh.garden.forEach(function (itemId, oldIndex) {
-          const row = Math.floor(oldIndex / 6) + 1;
-          const column = (oldIndex % 6) + 2;
-          const newIndex = row * GARDEN_COLUMNS + column;
-          bigger[newIndex] = itemId;
-          if (fresh.sproutPlanted[oldIndex] !== undefined) {
-            movedSprouts[newIndex] = fresh.sproutPlanted[oldIndex];
-          }
-        });
-        fresh.garden = bigger;
-        fresh.sproutPlanted = movedSprouts;
-      } else if (!Array.isArray(fresh.garden) || fresh.garden.length !== GARDEN_PLOTS) {
-        fresh.garden = new Array(GARDEN_PLOTS).fill(null);
-      }
+      // (Old, smaller gardens are moved into the new size by normaliseSave below.)
       if (!DIFFICULTIES[fresh.settings.difficulty]) fresh.settings.difficulty = "normal";
       if (!MODES[fresh.settings.mode]) fresh.settings.mode = "typed";
     }
@@ -400,6 +422,33 @@ function loadSave() {
     // Nothing to do: we just carry on with a fresh save.
   }
   return normaliseSave(fresh);
+}
+
+// Earlier versions had smaller gardens. A garden's length tells us how many
+// columns it had: 24 plots was 6 across, 70 plots was 10 across.
+const OLD_GARDEN_COLUMNS = { 24: 6, 70: 10 };
+
+// Copy an old garden into the middle of a new, bigger one. Every plot moves
+// down and across by the same amount, so the layout stays exactly as it was.
+function growGarden(oldGarden, oldSprouts, oldColumns) {
+  const oldRows = oldGarden.length / oldColumns;
+  const rows = GARDEN_PLOTS / GARDEN_COLUMNS;
+  const across = Math.floor((GARDEN_COLUMNS - oldColumns) / 2);
+  const down = Math.floor((rows - oldRows) / 2);
+
+  function newIndex(old) {
+    return (Math.floor(old / oldColumns) + down) * GARDEN_COLUMNS + (old % oldColumns) + across;
+  }
+
+  const garden = new Array(GARDEN_PLOTS).fill(null);
+  const sprouts = {};
+  oldGarden.forEach(function (value, old) {
+    if (!value) return;
+    // "@12" markers point at another plot, so the number inside has to move too
+    garden[newIndex(old)] = value[0] === "@" ? "@" + newIndex(Number(value.slice(1))) : value;
+    if (oldSprouts[old] !== undefined) sprouts[newIndex(old)] = oldSprouts[old];
+  });
+  return { garden: garden, sprouts: sprouts };
 }
 
 // Make sure a save has everything the game expects. Old saves had one garden;
@@ -412,11 +461,26 @@ function normaliseSave(data) {
   data.gardens[data.biome] = data.garden;
   data.sprouts[data.biome] = data.sproutPlanted;
 
+  if (!data.pets) data.pets = {};
+  if (!Array.isArray(data.top) || (data.top.length === 0 && data.history.length > 0)) {
+    // First time: build the top 10 from the round history
+    data.top = data.history.slice().sort(function (a, b) { return b.score - a.score; }).slice(0, 10);
+  }
+
   BIOMES.forEach(function (biome) {
-    if (!Array.isArray(data.gardens[biome.id]) || data.gardens[biome.id].length !== GARDEN_PLOTS) {
+    if (!data.sprouts[biome.id]) data.sprouts[biome.id] = {};
+    if (!data.pets[biome.id]) data.pets[biome.id] = {};
+
+    const garden = data.gardens[biome.id];
+    const oldColumns = Array.isArray(garden) ? OLD_GARDEN_COLUMNS[garden.length] : undefined;
+    if (oldColumns) {
+      // A garden from an earlier, smaller version: move it into the middle of the new one
+      const moved = growGarden(garden, data.sprouts[biome.id], oldColumns);
+      data.gardens[biome.id] = moved.garden;
+      data.sprouts[biome.id] = moved.sprouts;
+    } else if (!Array.isArray(garden) || garden.length !== GARDEN_PLOTS) {
       data.gardens[biome.id] = new Array(GARDEN_PLOTS).fill(null);
     }
-    if (!data.sprouts[biome.id]) data.sprouts[biome.id] = {};
     // Anything already planted counts as logged
     data.gardens[biome.id].forEach(function (value) {
       const item = value && value[0] !== "@" ? findItem(value) : null;
@@ -1005,6 +1069,11 @@ function endRound() {
     save.history = save.history.slice(-200);
   }
 
+  // Keep your ten best rounds ever: add this one, sort highest first, keep 10
+  save.top.push(save.history[save.history.length - 1]);
+  save.top.sort(function (a, b) { return b.score - a.score; });
+  save.top = save.top.slice(0, 10);
+
   // Is this a new personal best for these settings?
   const key = bestKey();
   const oldBest = save.best[key] || 0;   // "|| 0" means: use 0 if there's no best yet
@@ -1317,6 +1386,12 @@ function renderGarden() {
       }
       if (item.water) sprite.classList.add("shimmer");
       plot.appendChild(sprite);
+      if (item.spin) {
+        // A second picture on top that turns (the water wheel)
+        const spinner = makeSpriteElement({ id: item.spin });
+        spinner.classList.add("spinner");
+        plot.appendChild(spinner);
+      }
       plot.setAttribute("aria-label", item.name + ", tap to pick up");
     } else {
       plot.setAttribute("aria-label", "Empty plot");
@@ -1365,8 +1440,12 @@ function renderGarden() {
   // --- The hint line ---
   if (selectedItemId) {
     const held = findItem(selectedItemId);
-    gardenHintEl.textContent = "Tap an empty plot to place your " + held.name.toLowerCase() +
-      (itemSize(held) > 1 ? ". It needs a 2 x 2 space." : ".");
+    if (held.roam) {
+      gardenHintEl.textContent = "Tap anywhere in the garden to set your " + held.name.toLowerCase() + " free.";
+    } else {
+      gardenHintEl.textContent = "Tap an empty plot to place your " + held.name.toLowerCase() +
+        (itemSize(held) > 1 ? ". It needs a 2 x 2 space." : ".");
+    }
   } else if (bagIsEmpty) {
     gardenHintEl.textContent = elsewhere > 0
       ? "Nothing in your bag grows here. " + elsewhere + " of your plants belong in other gardens."
@@ -1378,6 +1457,17 @@ function renderGarden() {
 
 function tapPlot(index) {
   const planted = itemAt(index);
+
+  // Animals don't take up a plot. Tapping anywhere sets one free in this garden.
+  const animal = selectedItemId ? findItem(selectedItemId) : null;
+  if (animal && animal.roam && save.inventory[animal.id] > 0) {
+    const pets = save.pets[save.biome];
+    pets[animal.id] = (pets[animal.id] || 0) + 1;
+    save.inventory[animal.id] = save.inventory[animal.id] - 1;
+    writeSave();
+    renderGarden();
+    return;
+  }
 
   if (planted) {
     // Pick it up: clear every plot it covers, and back into the bag it goes
@@ -1474,11 +1564,11 @@ function addWildlife() {
   newFinds = 0;
   visitors.forEach(function (visitor) {
     markSeen(visitor.id);
-    // Worms don't wander: one pokes in and out of the soil by each mushroom
+    // Worms don't wander far: one inches along the ground by each mushroom
     if (visitor.id === "worm") {
       mushrooms.slice(0, 3).forEach(function (index, n) {
-        const burrow = addOverlay(index, "wormup", "burrow", 0.62, 0.42, 0.4);
-        burrow.firstChild.style.animationDelay = (-n * 1.7) + "s";
+        const worm = addOverlay(index, "worm", "crawl", 0.1, 0.55, 0.45);
+        worm.style.animationDelay = (-n * 2.3) + "s";
       });
       return;
     }
@@ -1503,6 +1593,44 @@ function addWildlife() {
     gardenGridEl.appendChild(creature);
     wanderers = wanderers + 1;
   });
+
+  // --- Your own animals roam too. Each also gets a button to call it back. ---
+  const pets = save.pets[save.biome];
+  const petsRowEl = document.getElementById("pets-row");
+  petsRowEl.innerHTML = "";
+  Object.keys(pets).forEach(function (petId) {
+    const pet = findItem(petId);
+    if (!pet || !pets[petId]) return;
+
+    for (let n = 0; n < pets[petId]; n++) {
+      const creature = document.createElement("div");
+      creature.className = "visitor";
+      // Different numbers for each animal so they spread out and don't walk in step
+      creature.style.top = (6 + (wanderers * 37) % 84) + "%";
+      creature.style.animationDuration = (24 + (wanderers * 11) % 40) + "s";
+      creature.style.animationDelay = (-wanderers * 5) + "s";
+      creature.appendChild(makeSpriteElement(pet));
+      gardenGridEl.appendChild(creature);
+      wanderers = wanderers + 1;
+    }
+
+    const button = document.createElement("button");
+    button.className = "tray-item";
+    button.setAttribute("aria-label", pet.name + ", " + pets[petId] + " roaming. Tap to put one back in your bag.");
+    button.appendChild(makeSpriteElement(pet));
+    const badge = document.createElement("span");
+    badge.className = "tray-count";
+    badge.textContent = pets[petId];
+    button.appendChild(badge);
+    button.addEventListener("click", function () {
+      pets[petId] = pets[petId] - 1;
+      save.inventory[petId] = (save.inventory[petId] || 0) + 1;
+      writeSave();
+      renderGarden();
+    });
+    petsRowEl.appendChild(button);
+  });
+  document.getElementById("pets-label").classList.toggle("hidden", petsRowEl.children.length === 0);
 
   // --- Homes: enough of one thing and the visitors move in ---
 
@@ -1623,8 +1751,43 @@ function renderScores() {
     bestListEl.textContent = "No bests yet.";
   }
 
+  // --- Your top 10 ever, and your top 10 since Monday ---
+  fillScoreList(document.getElementById("top-list"), save.top);
+
+  const monday = new Date();
+  monday.setHours(0, 0, 0, 0);                                   // back to midnight...
+  monday.setDate(monday.getDate() - (monday.getDay() + 6) % 7);  // ...then back to Monday
+  const thisWeek = save.history.filter(function (entry) {
+    return entry.date >= monday.getTime();
+  }).sort(function (a, b) {
+    return b.score - a.score;
+  }).slice(0, 10);
+  fillScoreList(document.getElementById("week-list"), thisWeek);
+
   resetArmed = false;
   resetBtn.textContent = "reset everything";
+}
+
+// Draw a numbered list of rounds: place, score, settings and date
+function fillScoreList(listEl, entries) {
+  listEl.innerHTML = "";
+  if (entries.length === 0) {
+    listEl.textContent = "Nothing here yet.";
+    return;
+  }
+  entries.forEach(function (entry, i) {
+    const rowEl = document.createElement("div");
+    rowEl.className = "best-row";
+    const left = document.createElement("span");
+    const when = new Date(entry.date).toLocaleDateString(undefined, { day: "numeric", month: "short" });
+    left.textContent = (i + 1) + ". " + DIFFICULTIES[entry.difficulty].label + " / " +
+      MODES[entry.mode].label + " · " + when;
+    const right = document.createElement("strong");
+    right.textContent = entry.score;
+    rowEl.appendChild(left);
+    rowEl.appendChild(right);
+    listEl.appendChild(rowEl);
+  });
 }
 
 // Wiping your save needs two taps, so you can't do it by accident.

@@ -313,7 +313,7 @@ h2 {
 /* ----- 8. Garden ----- */
 .garden-grid {
   display: grid;
-  grid-template-columns: repeat(10, 1fr);  /* 10 plots per row */
+  grid-template-columns: repeat(14, 1fr);  /* 14 plots per row */
   position: relative;      /* so visitors can be placed inside it */
   overflow: hidden;        /* visitors can't wander outside */
   background-color: var(--grass);
@@ -357,8 +357,8 @@ h2 {
 
 @keyframes garden-wander {
   0%     { left: 0;                 transform: scaleX(1); }
-  49.9%  { left: calc(100% - 24px); transform: scaleX(1); }
-  50%    { left: calc(100% - 24px); transform: scaleX(-1); }
+  49.9%  { left: calc(100% - 36px); transform: scaleX(1); }
+  50%    { left: calc(100% - 36px); transform: scaleX(-1); }
   99.9%  { left: 0;                 transform: scaleX(-1); }
   100%   { left: 0;                 transform: scaleX(1); }
 }
@@ -836,13 +836,31 @@ body.night .firefly { animation: glow 3.2s ease-in-out infinite; }
   50%      { transform: scaleX(0.3); }
 }
 
-/* Worm: the box hides anything outside it, and the worm slides up into view */
-.burrow { overflow: hidden; border-bottom: 3px solid #6b4429; }
-.burrow .sprite { animation: peek 6s ease-in-out infinite; }
-@keyframes peek {
-  0%, 15%   { transform: translateY(100%); }
-  30%, 60%  { transform: translateY(15%); }
-  75%, 100% { transform: translateY(100%); }
+/* Worm: slides slowly along the ground and back, squashing and stretching as it goes */
+.crawl { animation: crawl 10s ease-in-out infinite alternate; }
+.crawl .sprite { animation: inch 0.9s steps(2) infinite; }
+@keyframes crawl {
+  from { transform: translateX(0); }
+  to   { transform: translateX(150%); }
+}
+@keyframes inch {
+  0%, 100% { transform: scaleX(1); }
+  50%      { transform: scaleX(0.7); }
+}
+
+/* The water wheel: the wheel picture sits over the frame and turns in 8 jumps */
+.plot { position: relative; }
+.spinner {
+  position: absolute;
+  left: 14%;
+  top: 4%;
+  width: 72%;
+  height: 72%;
+  animation: spin 2.4s steps(8) infinite;
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
 
 /* Fish: hidden most of the time, then a quick leap */
@@ -1051,7 +1069,7 @@ body.night .firefly { animation: glow 3.2s ease-in-out infinite; }
 /* The garden breaks out of the narrow column: nearly the full width of a
    phone, and up to 800px on a laptop. left 50% + translateX(-50%) centres it. */
 .garden-grid {
-  width: min(calc(100vw - 20px), 800px);
+  width: min(calc(100vw - 20px), 900px);
   margin-left: 50%;
   transform: translateX(-50%);
 }
@@ -1140,6 +1158,20 @@ body.night .garden-head h2 { color: #fff6e0; }
 }
 
 .nav-btn { font-size: 10px; }
+
+
+/* ----- 23. Laptop and desktop screens -----
+   Everything above is sized for a phone first. On a wide window the column
+   gets wider, the four games sit in one row, and the visitors get bigger. */
+@media (min-width: 900px) {
+  main, .top-bar { max-width: 760px; }
+  .mode-tabs { grid-template-columns: repeat(4, 1fr); }
+  .title { font-size: 52px; }
+  .visitor { width: 36px; height: 36px; }
+  .nav-btn { max-width: 160px; font-size: 12px; }
+  .wg-board { grid-template-columns: repeat(5, 62px); }
+  .wg-tile { height: 62px; }
+}
 
 
 /* Some people get dizzy from movement and switch it off on their device.

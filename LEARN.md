@@ -96,6 +96,12 @@ A big item has `size: 2`. Its first plot holds the item id and the other three h
 
 Streams, paths and fences have `connect` instead of a picture. `neighbourMask` checks the four sides and packs the answers into one number (up 1, right 2, down 4, left 8), and `makeConnectedRows` draws the matching shape.
 
+### Animals and the water wheel (parts 1 and 10)
+
+Animals have `roam: true`. They don't sit on a plot: releasing one adds it to `save.pets` for that biome, and `addWildlife` draws it wandering like the visitors.
+
+The water wheel has `spin: "wheel"`, which draws a second picture on top that turns with a CSS animation.
+
 ### Day and night (part 13, and style.css part 17)
 
 A counter ticks once a second and wraps round with `%`. For the last 2 minutes of every 6 it adds the class `night` to the page, and the CSS fades everything.

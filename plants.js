@@ -77,6 +77,7 @@ const SHAPES = {
   caudex:        [".1...1..", "121.121.", ".1.b.1..", "..bbb...", "..bbb...", ".bbbbb..", ".bbbbb..", "........"],
   vinepod:       ["g.......", "g.11....", "g121....", "g.1.....", "gg......", "g.3.....", "g.3.....", "g.3....."],
   yuccashape:    ["...2....", "..222...", "...2....", "...2....", "1..2..1.", ".1.2.1..", "1.111.1.", ".11111.."],
+  lily:          ["1..2..1.", ".1.2.1..", ".11211..", "..111...", "...g.g..", "..gg....", "...gg...", "...g...."],
   // --- More fungi ---
   bracket:       ["........", ".111....", "12121...", "bbbbbbbb", "bb.111.b", "bb12121b", "bbbbbbbb", "........"],
   tallcap:       ["...11...", "..1111..", "..1211..", "..1111..", "..1121..", "..2222..", "...33...", "...33..."],
@@ -133,6 +134,7 @@ const BIOME_PLANTS = {
     P("cornflower", "Cornflower", "Centaurea cyanus", 60, "flower", "ragged", "un", "Once a common weed of cornfields, it became rare in the wild as farming changed."),
     P("strawberry", "Wild strawberry", "Fragaria vesca", 85, "leafy", "berryplant", "gr", "The 'seeds' on the outside of a strawberry are the real fruits."),
     P("foxglove", "Foxglove", "Digitalis purpurea", 110, "flower", "bells", "m", "Foxgloves are poisonous, yet the heart medicine digoxin comes from this group of plants."),
+    P("lily", "Madonna lily", "Lilium candidum", 150, "flower", "lily", "wo", "Grown for more than 3,000 years, it is one of the oldest garden flowers. Lily pollen is poisonous to cats."),
     P("hollyhock", "Hollyhock", "Alcea rosea", 140, "flower", "spike", "py", "Hollyhocks are in the mallow family, along with cotton and okra."),
     R("beeorchid", "Bee orchid", "Ophrys apifera", "flower", "orchidarch", "pb", "Its flower mimics a female bee to attract males, though in Britain it mostly pollinates itself."),
   ],
