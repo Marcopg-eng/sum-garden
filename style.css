@@ -1,0 +1,962 @@
+/* =====================================================
+   SUM GARDEN — how everything looks
+   Tip: change a value, save, refresh the browser.
+   ===================================================== */
+
+
+/* ----- 1. Colours -----
+   These are "variables". Change one here and it changes everywhere. */
+:root {
+  --ink: #2b2640;          /* dark outline colour used for borders and text */
+  --sky-top: #aee3ff;
+  --sky-bottom: #ffe6f2;
+  --grass: #7ed37a;
+  --grass-dark: #4fae5b;
+  --card: #fffaf0;         /* the cream colour of panels */
+  --pink: #ff8fb8;
+  --yellow: #ffd84d;
+  --blue: #5cc3f0;
+  --red: #e8504f;
+}
+
+
+/* ----- 2. Page basics ----- */
+* {
+  box-sizing: border-box;  /* makes widths include borders: easier sizing */
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Silkscreen", monospace;
+  font-size: 16px;
+  color: var(--ink);
+  /* the sky: blue at the top fading to pink */
+  background: linear-gradient(var(--sky-top), var(--sky-bottom) 70%) fixed;
+  overflow-x: hidden;
+}
+
+main {
+  position: relative;      /* sits above the clouds */
+  z-index: 1;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 16px 16px 150px; /* bottom space so the nav and critters never cover content */
+}
+
+.screen {
+  text-align: center;
+}
+
+/* Anything with class "hidden" disappears. game.js adds/removes this class
+   to switch between screens. */
+.hidden {
+  display: none !important;
+}
+
+h1, h2, .logo, .big-number, #question, .btn, .nav-btn {
+  font-family: "Press Start 2P", monospace;
+}
+
+h2 {
+  font-size: 20px;
+  margin: 16px 0;
+}
+
+.small {
+  font-size: 14px;
+  margin: 10px 0;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin: 14px 0 8px;
+}
+
+
+/* ----- 3. Top bar ----- */
+.top-bar {
+  position: relative;
+  z-index: 1;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 14px 16px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 11px;
+}
+
+.coins {
+  background: var(--card);
+  border: 3px solid var(--ink);
+  padding: 6px 10px;
+  font-weight: 700;
+}
+
+/* A tiny square pixel coin */
+.coin {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+  vertical-align: -2px;
+  background: var(--yellow);
+  border: 3px solid var(--ink);
+}
+
+
+/* ----- 4. Home screen ----- */
+.title {
+  font-size: 40px;
+  line-height: 1.3;
+  margin: 24px 0 12px;
+  color: var(--pink);
+  /* a hard-edged shadow gives the chunky pixel look */
+  text-shadow: 4px 4px 0 var(--ink);
+  animation: bob 1.6s steps(2) infinite;
+}
+
+.tagline {
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+/* The cream boxes */
+.panel {
+  background: var(--card);
+  border: 4px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
+  padding: 12px 16px 16px;
+  margin: 0 0 22px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.chip {
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  padding: 10px 12px;
+  background: #fff;
+  border: 3px solid var(--ink);
+  cursor: pointer;
+}
+
+/* game.js adds "selected" to the chip you picked */
+.chip.selected {
+  background: var(--blue);
+  box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.18);
+}
+
+
+/* ----- 5. Buttons ----- */
+.btn {
+  display: block;
+  width: 100%;
+  margin: 0 0 14px;
+  padding: 14px;
+  font-size: 13px;
+  color: var(--ink);
+  background: #fff;
+  border: 4px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
+  cursor: pointer;
+}
+
+.btn-big {
+  font-size: 16px;
+  padding: 18px;
+  background: var(--yellow);
+}
+
+/* When pressed, the button moves into its own shadow: looks like a real press */
+.btn:active {
+  transform: translate(6px, 6px);
+  box-shadow: none;
+}
+
+.btn:disabled {
+  background: #d9d5cf;
+  color: #8b8698;
+  cursor: not-allowed;
+}
+
+.link-btn {
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--ink);
+  background: none;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 12px;
+}
+
+
+/* ----- 6. Game screen ----- */
+.hud {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin: 12px 0 8px;
+}
+
+.timebar {
+  height: 16px;
+  background: #fff;
+  border: 3px solid var(--ink);
+  margin-bottom: 24px;
+}
+
+.timebar-fill {
+  height: 100%;
+  width: 100%;
+  background: var(--pink);
+  transition: width 1s linear;  /* slides smoothly between each second */
+}
+
+.question-card {
+  position: relative;      /* so the "+4" coin pop can be placed inside it */
+  padding: 36px 8px;
+}
+
+#question {
+  /* clamp(min, preferred, max): shrinks on small phones, grows on laptops */
+  font-size: clamp(22px, 7.5vw, 38px);
+}
+
+.answer-input {
+  width: 100%;
+  font-family: "Press Start 2P", monospace;
+  font-size: 26px;
+  text-align: center;
+  color: var(--ink);
+  padding: 16px 8px;
+  background: #fff;
+  border: 4px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
+  border-radius: 0;
+  outline: none;
+}
+
+.answer-input:focus {
+  background: #fffbe0;
+}
+
+.choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;   /* two columns of buttons */
+  gap: 14px 18px;
+}
+
+.choices .btn {
+  margin: 0;
+  font-size: 18px;
+  padding: 18px 6px;
+}
+
+/* The little "+4" that floats up when you get one right */
+.coin-pop {
+  position: absolute;
+  right: 14px;
+  top: 10px;
+  font-weight: 700;
+  font-size: 16px;
+  color: #c98a00;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.coin-pop.float-up {
+  animation: float-up 0.7s ease-out;
+}
+
+/* game.js adds these classes for a moment to play the animations */
+.pop {
+  animation: pop 0.18s steps(3);
+}
+
+.shake {
+  animation: shake 0.25s steps(4);
+}
+
+
+/* ----- 7. Results screen ----- */
+.big-number {
+  font-size: 48px;
+  margin: 8px 0 12px;
+}
+
+.new-best {
+  display: inline-block;
+  font-weight: 700;
+  padding: 6px 10px;
+  margin: 0 0 6px;
+  background: var(--pink);
+  border: 3px solid var(--ink);
+  animation: bob 0.6s steps(2) infinite;
+}
+
+
+/* ----- 8. Garden ----- */
+.garden-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);  /* 10 plots per row */
+  position: relative;      /* so visitors can be placed inside it */
+  overflow: hidden;        /* visitors can't wander outside */
+  background-color: var(--grass);
+  background-size: 80px 80px;   /* the 16x16 lawn tile, drawn 5 times bigger */
+  image-rendering: pixelated;
+  border: 4px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
+  margin-bottom: 22px;
+}
+
+.plot {
+  aspect-ratio: 1;         /* keeps every plot square */
+  padding: 3%;
+  border: none;
+  background: transparent;   /* invisible: you just see the lawn */
+  cursor: pointer;
+}
+
+.plot:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+/* While you're holding an item, empty plots show where it can go */
+.garden-grid.placing .plot:empty {
+  outline: 2px dashed rgba(255, 255, 255, 0.6);
+  outline-offset: -3px;
+}
+
+/* Creatures that visit the garden */
+.visitor {
+  position: absolute;
+  z-index: 1;
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+  animation: garden-wander 30s linear infinite;
+}
+
+.visitor .sprite { animation: hop 0.6s steps(2) infinite; }
+.visitor.flier .sprite { animation: bob 0.4s steps(2) infinite; }
+
+@keyframes garden-wander {
+  0%     { left: 0;                 transform: scaleX(1); }
+  49.9%  { left: calc(100% - 24px); transform: scaleX(1); }
+  50%    { left: calc(100% - 24px); transform: scaleX(-1); }
+  99.9%  { left: 0;                 transform: scaleX(-1); }
+  100%   { left: 0;                 transform: scaleX(1); }
+}
+
+/* A sprite is a tiny 8x8 picture that game.js draws. "pixelated" keeps the
+   pixels sharp when the browser scales it up. */
+.sprite {
+  width: 100%;
+  height: 100%;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  image-rendering: pixelated;
+}
+
+.sprite.sway {
+  transform-origin: bottom center;   /* rock from the base, like a plant */
+  animation: sway 2.4s ease-in-out infinite;
+}
+
+.tray {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  min-height: 64px;
+}
+
+.tray-item {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  padding: 8px;
+  background: var(--card);
+  border: 3px solid var(--ink);
+  cursor: pointer;
+}
+
+.tray-item.selected {
+  background: var(--yellow);
+  box-shadow: 4px 4px 0 var(--ink);
+  transform: translate(-2px, -2px);
+}
+
+/* The little number showing how many you have */
+.tray-count {
+  position: absolute;
+  right: -8px;
+  top: -8px;
+  min-width: 22px;
+  padding: 2px 4px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--pink);
+  border: 2px solid var(--ink);
+}
+
+
+/* ----- 9. Shop ----- */
+.shop-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 20px;
+  margin-top: 16px;
+}
+
+.shop-card {
+  background: var(--card);
+  border: 4px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
+  padding: 12px;
+}
+
+.shop-card .sprite {
+  width: 72px;
+  height: 72px;
+  margin: 4px auto 8px;
+  /* a little square of lawn behind the picture, so white petals show up */
+  background-color: var(--grass);
+  border: 3px solid var(--ink);
+}
+
+.tray-item .sprite {
+  background-color: var(--grass);
+}
+
+.shop-name {
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.shop-card .btn {
+  margin: 8px 0 0;
+  padding: 10px 4px;
+  font-size: 11px;
+  background: var(--yellow);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.shop-card .btn:active {
+  transform: translate(4px, 4px);
+}
+
+.shop-card .btn:disabled {
+  background: #d9d5cf;
+}
+
+
+/* ----- 10. Scores ----- */
+.chart {
+  display: flex;
+  align-items: flex-end;   /* bars grow up from the bottom */
+  gap: 4px;
+  height: 150px;
+  padding-top: 18px;
+  border-bottom: 3px solid var(--ink);
+}
+
+.bar {
+  position: relative;
+  flex: 1;                 /* all bars share the width equally */
+  min-height: 3px;
+  background: var(--blue);
+  border: 2px solid var(--ink);
+  border-bottom: none;
+}
+
+/* The newest bar is pink so you can spot your latest round */
+.bar.latest {
+  background: var(--pink);
+}
+
+.bar-label {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+}
+
+.best-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  padding: 6px 0;
+  border-bottom: 2px dotted #cfc8bb;
+}
+
+
+/* ----- 11. Bottom nav (sits on a strip of grass) ----- */
+.nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 8px 14px;
+  background: var(--grass);
+  border-top: 4px solid var(--grass-dark);
+}
+
+.nav-btn {
+  flex: 1;
+  max-width: 120px;
+  font-size: 10px;
+  color: var(--ink);
+  padding: 12px 2px;
+  background: var(--card);
+  border: 3px solid var(--ink);
+  cursor: pointer;
+}
+
+.nav-btn.selected {
+  background: var(--yellow);
+}
+
+/* While a round is running, game.js adds "playing" to <body> and the nav hides */
+body.playing .nav {
+  display: none;
+}
+
+
+/* ----- 12. Clouds ----- */
+.cloud {
+  position: fixed;
+  left: -160px;
+  z-index: 0;
+  width: 96px;
+  height: 24px;
+  background: #fff;
+  opacity: 0.9;
+  pointer-events: none;    /* clicks pass straight through */
+  animation: drift 70s linear infinite;
+}
+
+/* ::before and ::after add two extra blocks on top to make the cloud shape */
+.cloud::before {
+  content: "";
+  position: absolute;
+  left: 24px;
+  top: -24px;
+  width: 48px;
+  height: 24px;
+  background: #fff;
+}
+
+.cloud::after {
+  content: "";
+  position: absolute;
+  left: 40px;
+  top: -40px;
+  width: 24px;
+  height: 16px;
+  background: #fff;
+}
+
+/* Negative delays mean the clouds start part-way across, not all off-screen */
+.cloud-1 { top: 90px;  animation-duration: 80s;  animation-delay: -20s; }
+.cloud-2 { top: 220px; animation-duration: 110s; animation-delay: -70s; transform: scale(0.8); }
+.cloud-3 { top: 400px; animation-duration: 95s;  animation-delay: -45s; }
+
+
+/* ----- 13. Animations -----
+   @keyframes describes the movement; "animation:" above uses it by name. */
+@keyframes drift {
+  from { left: -160px; }
+  to   { left: 100%; }
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+
+@keyframes sway {
+  0%, 100% { transform: rotate(-4deg); }
+  50%      { transform: rotate(4deg); }
+}
+
+@keyframes pop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-8px); }
+  75%      { transform: translateX(8px); }
+}
+
+@keyframes float-up {
+  0%   { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-28px); }
+}
+
+/* ----- 14. The 3D look -----
+   Two "inset" shadows inside each box: a light one on the top-left edge and
+   a dark one on the bottom-right. Your eye reads that as a raised block. */
+.panel, .shop-card, .btn, .answer-input {
+  box-shadow:
+    inset 4px 4px 0 rgba(255, 255, 255, 0.75),
+    inset -4px -4px 0 rgba(43, 38, 64, 0.18),
+    6px 6px 0 var(--ink);
+}
+
+.chip, .nav-btn, .coins, .tray-item {
+  box-shadow:
+    inset 3px 3px 0 rgba(255, 255, 255, 0.75),
+    inset -3px -3px 0 rgba(43, 38, 64, 0.18),
+    3px 3px 0 var(--ink);
+}
+
+/* Pressed-in: the light and dark edges swap sides */
+.btn:active, .chip.selected, .nav-btn.selected {
+  box-shadow:
+    inset 4px 4px 0 rgba(43, 38, 64, 0.22),
+    inset -3px -3px 0 rgba(255, 255, 255, 0.5);
+}
+
+.chip.selected, .nav-btn.selected {
+  transform: translate(3px, 3px);
+}
+
+/* A layer of soil under the grass */
+.nav {
+  padding-bottom: 24px;
+  box-shadow: inset 0 -12px 0 #8a5a3c, inset 0 -16px 0 #6b4429;
+}
+
+
+/* ----- 15. Bonus coin, and small extras ----- */
+.bonus-coin {
+  position: fixed;
+  z-index: 3;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  font-family: "Press Start 2P", monospace;
+  font-size: 12px;
+  color: var(--ink);
+  background: var(--yellow);
+  border: 4px solid var(--ink);
+  box-shadow:
+    inset 4px 4px 0 rgba(255, 255, 255, 0.7),
+    inset -4px -4px 0 #f5b301,
+    4px 4px 0 var(--ink);
+  cursor: pointer;
+  animation: hop 0.5s steps(2) infinite;
+}
+
+/* After you click it, it turns into a "+7" label for a moment */
+.bonus-coin.collected {
+  width: auto;
+  padding: 0 8px;
+  background: var(--card);
+  animation: none;
+}
+
+#question.long {
+  font-size: clamp(15px, 4.6vw, 24px);
+}
+
+.grow-line {
+  font-weight: 700;
+  color: #2f7d4a;
+}
+
+.shop-note {
+  font-size: 11px;
+  margin: 0 0 6px;
+}
+
+
+/* ----- 16. Critters ----- */
+.critters {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 74px;            /* standing on top of the grass */
+  height: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+body.playing .critters {
+  display: none;           /* no distractions during a round */
+}
+
+.critter {
+  position: absolute;
+  bottom: 0;
+  width: 32px;
+  height: 32px;
+  animation: wander 40s linear infinite;
+}
+
+.critter .sprite {
+  animation: hop 0.6s steps(2) infinite;
+}
+
+.critter-snail .sprite { animation-duration: 1.6s; }
+.critter-bee { bottom: 46px; }
+.critter-bee .sprite { animation: bob 0.4s steps(2) infinite; }
+
+/* Water gently changes brightness */
+.sprite.shimmer {
+  animation: shimmer 1.8s steps(3) infinite;
+}
+
+/* Walk right, turn round (scaleX(-1) flips the picture), walk back */
+@keyframes wander {
+  0%     { left: -40px; transform: scaleX(1); }
+  49.9%  { left: 100%;  transform: scaleX(1); }
+  50%    { left: 100%;  transform: scaleX(-1); }
+  99.9%  { left: -40px; transform: scaleX(-1); }
+  100%   { left: -40px; transform: scaleX(1); }
+}
+
+@keyframes hop {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+
+@keyframes shimmer {
+  0%, 100% { filter: brightness(1); }
+  50%      { filter: brightness(1.18); }
+}
+
+/* ----- 17. Day and night -----
+   game.js adds the class "night" to <body>. Everything here reacts to that.
+   "transition" makes the change fade slowly instead of snapping. */
+.night-sky {
+  position: fixed;
+  inset: 0;                /* stretch to all four edges */
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(#1b1f4b, #4b3f86 70%, #a0669a);
+  opacity: 0;
+  transition: opacity 8s linear;
+}
+
+/* Stars: one tiny square, copied around the sky with box-shadow */
+.night-sky::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 3px;
+  height: 3px;
+  background: #fff;
+  box-shadow: 8vw 12vh #fff, 22vw 30vh #fff, 35vw 8vh #fff, 48vw 22vh #fff, 61vw 14vh #fff,
+    74vw 34vh #fff, 88vw 9vh #fff, 15vw 48vh #fff, 93vw 44vh #fff, 55vw 40vh #fff, 30vw 55vh #fff, 70vw 52vh #fff;
+}
+
+body.night .night-sky { opacity: 1; }
+body.night .cloud { opacity: 0.3; }
+.cloud { transition: opacity 8s linear; }
+
+/* Text that sits straight on the sky turns pale at night so you can still read it */
+.screen > h2, .screen > p, .hud, .link-btn, .logo { transition: color 8s linear; }
+body.night .screen > h2, body.night .screen > p, body.night .hud,
+body.night .link-btn, body.night .logo { color: #fff6e0; }
+
+/* The garden gets a dark blue wash... */
+.garden-grid::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: #1b1f4b;
+  opacity: 0;
+  transition: opacity 8s linear;
+}
+body.night .garden-grid::after { opacity: 0.42; }
+
+/* ...and the fireflies come out */
+.firefly {
+  position: absolute;
+  z-index: 3;
+  width: 4px;
+  height: 4px;
+  background: #fff7a8;
+  box-shadow: 0 0 6px 2px #ffe95c;
+  opacity: 0;
+  pointer-events: none;
+}
+body.night .firefly { animation: glow 3.2s ease-in-out infinite; }
+
+@keyframes glow {
+  0%, 100% { opacity: 0; transform: translate(0, 0); }
+  50%      { opacity: 1; transform: translate(10px, -8px); }
+}
+
+
+/* ----- 18. Garden wildlife ----- */
+.plot.joined { padding: 0; }       /* streams, paths and fences touch their neighbours */
+
+.overlay {
+  position: absolute;
+  z-index: 1;
+  aspect-ratio: 1;
+  pointer-events: none;
+}
+
+/* Butterfly: squashing the picture sideways and back looks like flapping */
+.visitor-butterfly .sprite { animation: flap 0.35s steps(2) infinite; }
+@keyframes flap {
+  0%, 100% { transform: scaleX(1); }
+  50%      { transform: scaleX(0.3); }
+}
+
+/* Worm: the box hides anything outside it, and the worm slides up into view */
+.burrow { overflow: hidden; border-bottom: 3px solid #6b4429; }
+.burrow .sprite { animation: peek 6s ease-in-out infinite; }
+@keyframes peek {
+  0%, 15%   { transform: translateY(100%); }
+  30%, 60%  { transform: translateY(15%); }
+  75%, 100% { transform: translateY(100%); }
+}
+
+/* Fish: hidden most of the time, then a quick leap */
+.fish .sprite { animation: jump 5s ease-in-out infinite; }
+@keyframes jump {
+  0%, 70%, 100% { opacity: 0; transform: translateY(20%); }
+  76%           { opacity: 1; transform: translateY(-10%) rotate(-35deg); }
+  85%           { opacity: 1; transform: translateY(-70%) rotate(0deg); }
+  94%           { opacity: 1; transform: translateY(-10%) rotate(40deg); }
+}
+
+/* Duck: drifts gently from side to side */
+.floating { animation: paddle 8s ease-in-out infinite alternate; }
+.floating .sprite { animation: bob 1.2s steps(2) infinite; }
+@keyframes paddle {
+  from { transform: translateX(-20%); }
+  to   { transform: translateX(35%); }
+}
+
+/* Bees circling the hive */
+.orbit { animation: orbit 3s linear infinite; }
+@keyframes orbit {
+  0%   { transform: translate(110%, 0); }
+  25%  { transform: translate(0, -110%); }
+  50%  { transform: translate(-110%, 0); }
+  75%  { transform: translate(0, 110%); }
+  100% { transform: translate(110%, 0); }
+}
+
+
+/* ----- 19. The extra games ----- */
+.wg-board {
+  display: grid;
+  grid-template-columns: repeat(5, 52px);
+  gap: 6px;
+  justify-content: center;
+  margin: 12px 0 16px;
+}
+
+.wg-tile, .letter-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 52px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 20px;
+  text-transform: uppercase;
+  background: var(--card);
+  border: 3px solid var(--ink);
+  box-shadow: inset 3px 3px 0 rgba(255, 255, 255, 0.7), inset -3px -3px 0 rgba(43, 38, 64, 0.15);
+}
+
+.green  { background: var(--grass) !important; }
+.yellow { background: var(--yellow) !important; }
+.grey   { background: #b9b4c7 !important; }
+
+.wg-keyboard { margin-bottom: 18px; }
+.wg-key-row { display: flex; justify-content: center; gap: 4px; margin-bottom: 5px; }
+
+.wg-key {
+  flex: 1;
+  max-width: 40px;
+  height: 46px;
+  padding: 0;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--card);
+  border: 2px solid var(--ink);
+  cursor: pointer;
+}
+.wg-key.wide { flex: 1.6; max-width: 62px; font-size: 10px; }
+
+.letter-row {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 4px;
+  margin: 12px 0 20px;
+}
+.letter-tile { height: 46px; font-size: 16px; }
+
+.word-input { font-size: 18px; margin-bottom: 18px; }
+
+.pad {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.pad-btn {
+  height: 46px;
+  padding: 0;
+  font-family: "Press Start 2P", monospace;
+  font-size: 12px;
+  color: var(--ink);
+  background: var(--card);
+  border: 3px solid var(--ink);
+  box-shadow: inset 3px 3px 0 rgba(255, 255, 255, 0.7), inset -3px -3px 0 rgba(43, 38, 64, 0.15);
+  cursor: pointer;
+}
+.pad-btn.number { background: var(--blue); }
+.pad-btn:nth-child(n+7) { grid-column: span 1; font-size: 11px; }
+
+#nm-feedback { min-height: 18px; font-weight: 700; }
+
+
+/* Some people get dizzy from movement and switch it off on their device.
+   This respects that setting. */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sum Garden</title>
+
+  <!-- Two free pixel fonts from Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Our own styles -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- The night sky: invisible by day, fades in at night (see style.css part 17) -->
+  <div class="night-sky"></div>
+
+  <!-- Decoration: three clouds that drift across the sky (animated in style.css) -->
+  <div class="cloud cloud-1"></div>
+  <div class="cloud cloud-2"></div>
+  <div class="cloud cloud-3"></div>
+
+  <!-- TOP BAR: game name on the left, your coins on the right. Always visible. -->
+  <header class="top-bar">
+    <span class="logo">Sum Garden</span>
+    <span class="coins"><span class="coin"></span><span id="coin-count">0</span></span>
+  </header>
+
+  <main>
+
+    <!-- ============ HOME SCREEN ============ -->
+    <section id="screen-home" class="screen">
+      <h1 class="title">Sum<br>Garden</h1>
+      <p class="tagline">60 seconds. Quick sums. Grow a garden.</p>
+
+      <div class="panel">
+        <p class="label">Answer mode</p>
+        <div class="chips">
+          <!-- data-setting and data-value are read by game.js when you click -->
+          <button class="chip" data-setting="mode" data-value="typed">Typed · 2x coins</button>
+          <button class="chip" data-setting="mode" data-value="choice">Multiple choice</button>
+        </div>
+
+        <p class="label">Difficulty</p>
+        <div class="chips">
+          <button class="chip" data-setting="difficulty" data-value="easy">Easy</button>
+          <button class="chip" data-setting="difficulty" data-value="normal">Normal</button>
+          <button class="chip" data-setting="difficulty" data-value="hard">Hard</button>
+        </div>
+
+        <p class="small" id="earn-line"></p>
+        <p class="small" id="best-line"></p>
+      </div>
+
+      <button id="start-btn" class="btn btn-big">Start round</button>
+
+      <div class="panel">
+        <p class="label">More games</p>
+        <button id="wordguess-btn" class="btn">Word Sprout · guess the word</button>
+        <button id="letters-btn" class="btn">Letter Patch · longest word</button>
+        <button id="numbers-btn" class="btn">Number Plot · hit the target</button>
+      </div>
+    </section>
+
+    <!-- ============ WORD SPROUT (puzzles.js part B) ============ -->
+    <section id="screen-wordguess" class="screen hidden">
+      <h2>Word Sprout</h2>
+      <p class="small" id="wg-message"></p>
+      <div id="wg-board" class="wg-board"></div>
+      <div id="wg-keyboard" class="wg-keyboard"></div>
+      <button id="wg-new-btn" class="btn">New word</button>
+    </section>
+
+    <!-- ============ LETTER PATCH (puzzles.js part C) ============ -->
+    <section id="screen-letters" class="screen hidden">
+      <h2>Letter Patch</h2>
+      <div class="hud"><span>Time <strong id="lt-time">30</strong></span><span id="lt-best">Best so far: none</span></div>
+      <div id="lt-letters" class="letter-row"></div>
+      <input id="lt-input" class="answer-input word-input" type="text" autocomplete="off"
+             autocapitalize="off" spellcheck="false" maxlength="9" aria-label="Your word">
+      <button id="lt-enter-btn" class="btn btn-big">Enter word</button>
+      <p class="small" id="lt-message"></p>
+      <button id="lt-new-btn" class="btn">New letters</button>
+    </section>
+
+    <!-- ============ NUMBER PLOT (puzzles.js part D) ============ -->
+    <section id="screen-numbers" class="screen hidden">
+      <h2>Number Plot</h2>
+      <div class="hud"><span>Time <strong id="nm-time">60</strong></span><span>Target</span></div>
+      <div class="panel"><p id="nm-target" class="big-number">0</p></div>
+      <div id="nm-pad" class="pad"></div>
+      <input id="nm-input" class="answer-input word-input" type="text" autocomplete="off"
+             autocapitalize="off" spellcheck="false" aria-label="Your sum">
+      <p class="small" id="nm-feedback"></p>
+      <button id="nm-lock-btn" class="btn btn-big">Lock in answer</button>
+      <p class="small" id="nm-message"></p>
+      <button id="nm-new-btn" class="btn">New numbers</button>
+    </section>
+
+    <!-- ============ GAME SCREEN ============ -->
+    <section id="screen-game" class="screen hidden">
+      <div class="hud">
+        <span>Time <strong id="time-left">60</strong></span>
+        <span>Score <strong id="score">0</strong></span>
+        <span>Streak <strong id="streak">0</strong></span>
+      </div>
+      <!-- The bar that shrinks as time runs out -->
+      <div class="timebar"><div id="time-fill" class="timebar-fill"></div></div>
+
+      <div id="question-card" class="panel question-card">
+        <div id="question">?</div>
+        <div id="coin-pop" class="coin-pop"></div>
+      </div>
+
+      <!-- Typed mode uses this box... -->
+      <input id="answer-input" class="answer-input" type="text" inputmode="numeric"
+             autocomplete="off" aria-label="Your answer">
+      <!-- ...and multiple choice mode uses these buttons (game.js fills them in) -->
+      <div id="choices" class="choices hidden"></div>
+
+      <button id="quit-btn" class="link-btn">quit round</button>
+    </section>
+
+    <!-- ============ RESULTS SCREEN ============ -->
+    <section id="screen-results" class="screen hidden">
+      <h2>Time's up!</h2>
+      <div class="panel">
+        <p class="label">Score</p>
+        <p id="final-score" class="big-number">0</p>
+        <p id="new-best" class="new-best hidden">New best!</p>
+        <p class="small" id="results-best"></p>
+        <p class="small grow-line" id="grow-line"></p>
+        <p class="small"><span class="coin"></span> earned: <strong id="results-coins">0</strong></p>
+      </div>
+      <button id="again-btn" class="btn btn-big">Play again</button>
+      <button id="to-shop-btn" class="btn">Visit the shop</button>
+    </section>
+
+    <!-- ============ GARDEN SCREEN ============ -->
+    <section id="screen-garden" class="screen hidden">
+      <h2>Your garden</h2>
+      <p class="small" id="garden-hint"></p>
+      <div id="garden-grid" class="garden-grid"></div>
+      <p class="small" id="visitor-line"></p>
+      <p class="label">Your bag</p>
+      <div id="tray" class="tray"></div>
+    </section>
+
+    <!-- ============ SHOP SCREEN ============ -->
+    <section id="screen-shop" class="screen hidden">
+      <h2>Shop</h2>
+      <p class="small">Spend coins here, then plant things in your garden.</p>
+      <div id="shop-list" class="shop-list"></div>
+    </section>
+
+    <!-- ============ SCORES SCREEN ============ -->
+    <section id="screen-scores" class="screen hidden">
+      <h2>Scores</h2>
+      <div class="panel">
+        <p class="label">Last 20 rounds</p>
+        <div id="chart" class="chart"></div>
+      </div>
+      <div class="panel">
+        <p class="label">Personal bests</p>
+        <div id="best-list"></div>
+      </div>
+      <button id="reset-btn" class="link-btn">reset everything</button>
+    </section>
+
+  </main>
+
+  <!-- A bonus coin that appears now and then outside rounds (see game.js part 13) -->
+  <button id="bonus-coin" class="bonus-coin hidden" aria-label="Bonus coin"></button>
+
+  <!-- Little critters that wander along the grass (game.js adds them) -->
+  <div id="critters" class="critters"></div>
+
+  <!-- BOTTOM NAV: the four main places you can go -->
+  <nav class="nav">
+    <button class="nav-btn" data-screen="home">Play</button>
+    <button class="nav-btn" data-screen="garden">Garden</button>
+    <button class="nav-btn" data-screen="shop">Shop</button>
+    <button class="nav-btn" data-screen="scores">Scores</button>
+  </nav>
+
+  <!-- The logic. Loaded last, so everything above exists before the code runs. -->
+  <script src="game.js"></script>
+  <!-- The word list, then the three extra games that use it -->
+  <script src="words.js"></script>
+  <script src="puzzles.js"></script>
+</body>
+</html>
