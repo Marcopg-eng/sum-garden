@@ -148,7 +148,11 @@
 
     <!-- ============ GARDEN SCREEN ============ -->
     <section id="screen-garden" class="screen hidden">
-      <h2>Your garden</h2>
+      <div class="garden-head">
+        <h2>Your garden</h2>
+        <!-- The little book: opens the botany log (logbook.js) -->
+        <button id="log-btn" class="book-btn" aria-label="Open the botany log"><span id="log-btn-icon" class="book-icon"></span>Log</button>
+      </div>
       <div id="biome-chips" class="chips biome-chips"></div>
       <p class="small" id="biome-progress"></p>
       <p class="small" id="garden-hint"></p>
@@ -164,13 +168,6 @@
       <p class="small">Spend coins here, then plant things in your garden.</p>
       <div id="shop-biome-chips" class="chips biome-chips"></div>
       <div id="shop-list" class="shop-list"></div>
-    </section>
-
-    <!-- ============ BOTANY LOG (logbook.js) ============ -->
-    <section id="screen-log" class="screen hidden">
-      <h2>Botany log</h2>
-      <p class="small">Every species you plant and every creature you attract is recorded here. Tap one to read about it.</p>
-      <div id="log-content"></div>
     </section>
 
     <!-- ============ SCORES SCREEN ============ -->
@@ -189,6 +186,16 @@
 
   </main>
 
+  <!-- The botany log: a book that opens over the garden (logbook.js) -->
+  <div id="log-book" class="book hidden">
+    <div class="book-page">
+      <button id="log-close" class="book-close" aria-label="Close the botany log">close</button>
+      <h2>Botany log</h2>
+      <p class="small">Every species you plant and every creature you attract is recorded here. Tap one to read about it.</p>
+      <div id="log-content"></div>
+    </div>
+  </div>
+
   <!-- A bonus coin that appears now and then outside rounds (see game.js part 13) -->
   <button id="bonus-coin" class="bonus-coin hidden" aria-label="Bonus coin"></button>
 
@@ -200,7 +207,6 @@
     <button class="nav-btn" data-screen="home">Play</button>
     <button class="nav-btn" data-screen="garden">Garden</button>
     <button class="nav-btn" data-screen="shop">Shop</button>
-    <button class="nav-btn" data-screen="log">Log</button>
     <button class="nav-btn" data-screen="scores">Scores</button>
   </nav>
 

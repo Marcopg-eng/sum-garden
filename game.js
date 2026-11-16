@@ -822,7 +822,7 @@ function showScreen(name) {
   if (name === "garden") renderGarden();
   if (name === "shop") renderShop();
   if (name === "scores") renderScores();
-  if (name === "log") renderLog();   // renderLog lives in logbook.js
+  document.getElementById("log-book").classList.add("hidden");   // leaving a screen shuts the botany log
 
   window.scrollTo(0, 0);
 }

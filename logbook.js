@@ -2,13 +2,31 @@
 // SUM GARDEN — the botany log
 //
 // A record of every species you've planted and every creature you've
-// attracted. It reads two things from the save:
+// attracted. It opens as a book over the garden when you tap the book
+// button. It reads two things from the save:
 //   save.log   plants you've planted at least once, e.g. { daisy: true }
 //   save.seen  creatures and homes you've seen,     e.g. { bee: true }
 // =====================================================
 
 const logEl = document.getElementById("log-content");
+const logBookEl = document.getElementById("log-book");
 let openLogId = null;   // the entry whose details are showing
+
+// The book button in the garden opens the log; "close" or a tap outside shuts it.
+document.getElementById("log-btn-icon").style.backgroundImage = "url(" + spriteImages.book + ")";
+
+document.getElementById("log-btn").addEventListener("click", function () {
+  renderLog();
+  logBookEl.classList.remove("hidden");
+});
+document.getElementById("log-close").addEventListener("click", function () {
+  logBookEl.classList.add("hidden");
+});
+logBookEl.addEventListener("click", function (event) {
+  // event.target is the exact thing clicked. Only close if it was the dark
+  // backdrop itself, not something inside the book.
+  if (event.target === logBookEl) logBookEl.classList.add("hidden");
+});
 
 function renderLog() {
   logEl.innerHTML = "";

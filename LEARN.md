@@ -82,11 +82,11 @@ Try: add your own visitor. Draw it in `EXTRA_SPRITES`, then add one line to `VIS
 
 ### Biomes, plants and the botany log (plants.js, logbook.js)
 
-`plants.js` is pure data: five biomes, about 85 plants, and the wildlife. Plants share 18 pixel `SHAPES`, and each plant recolours a shape with its own `colours`, which is why adding one takes a single `P(...)` line.
+`plants.js` is pure data: five biomes, about 85 plants, and the wildlife. Plants share about 60 pixel `SHAPES`, and each plant recolours a shape with its own `colours`, which is why adding one takes a single `P(...)` line.
 
 Each biome has its own garden in `save.gardens`. `save.garden` always points at the one on screen. A biome opens when you've logged 10 species in the one before it.
 
-`logbook.js` draws the log from `save.log` (plants) and `save.seen` (wildlife).
+`logbook.js` draws the log from `save.log` (plants) and `save.seen` (wildlife). It opens as a book over the garden when you tap the book button.
 
 Try: add a plant of your own to a biome with one `P(...)` line. It will appear in the shop, the sprout raffle and the log without any other changes.
 

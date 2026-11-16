@@ -1046,6 +1046,102 @@ body.night .firefly { animation: glow 3.2s ease-in-out infinite; }
 }
 
 
+/* ----- 22. A bigger garden, and the log book ----- */
+
+/* The garden breaks out of the narrow column: nearly the full width of a
+   phone, and up to 800px on a laptop. left 50% + translateX(-50%) centres it. */
+.garden-grid {
+  width: min(calc(100vw - 20px), 800px);
+  margin-left: 50%;
+  transform: translateX(-50%);
+}
+
+.garden-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.garden-head h2 { transition: color 8s linear; }
+body.night .garden-head h2 { color: #fff6e0; }
+
+.book-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px 6px 6px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 10px;
+  color: var(--ink);
+  background: var(--card);
+  border: 3px solid var(--ink);
+  box-shadow:
+    inset 3px 3px 0 rgba(255, 255, 255, 0.75),
+    inset -3px -3px 0 rgba(43, 38, 64, 0.18),
+    3px 3px 0 var(--ink);
+  cursor: pointer;
+  animation: bob 1.6s steps(2) infinite;
+}
+
+.book-icon {
+  width: 28px;
+  height: 28px;
+  background-size: contain;
+  image-rendering: pixelated;
+}
+
+/* The dark backdrop that covers the whole screen behind the open book */
+.book {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  background: rgba(27, 31, 75, 0.6);
+}
+
+/* The book itself: a brown cover with a cream page inside */
+.book-page {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  max-height: 88vh;
+  overflow-y: auto;        /* scroll inside the book if it's long */
+  padding: 14px 16px 18px;
+  text-align: center;
+  background: var(--card);
+  border: 6px solid #8a5a3c;
+  outline: 4px solid var(--ink);
+  box-shadow: inset 6px 0 0 #e9dcc0, 8px 8px 0 var(--ink);
+  transform-origin: left center;
+  animation: open-book 0.25s steps(5);
+}
+
+/* Opening: the page swings out from the spine on the left */
+@keyframes open-book {
+  from { transform: scaleX(0.05); }
+  to   { transform: scaleX(1); }
+}
+
+.book-close {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  padding: 6px 8px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 9px;
+  color: var(--ink);
+  background: var(--pink);
+  border: 3px solid var(--ink);
+  cursor: pointer;
+}
+
+.nav-btn { font-size: 10px; }
+
+
 /* Some people get dizzy from movement and switch it off on their device.
    This respects that setting. */
 @media (prefers-reduced-motion: reduce) {
